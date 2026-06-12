@@ -1,0 +1,7 @@
+{
+    "model": "logistic_regression",
+    "roc_auc": 0.9903298517628953,
+    "recall_fake": 0.9653179190751445,
+    "f1_fake": 0.5661016949152542,
+    "threshold": 0.2186378233239508
+}
