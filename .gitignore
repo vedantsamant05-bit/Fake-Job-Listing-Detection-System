@@ -4,8 +4,10 @@ __pycache__/
 *.pyo
 .env
 data/*.csv
-models/*.joblib
 models/*.pkl
+models/*.joblib
+!models/pipeline.joblib
+!models/threshold.joblib
 .ipynb_checkpoints/
 .DS_Store
 *.egg-info/

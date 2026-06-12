@@ -1,6 +1,5 @@
 import time
 import streamlit as st
-import streamlit.components.v1 as components
 import sys
 from pathlib import Path
 
@@ -101,116 +100,65 @@ div[data-testid="stCheckbox"]>label{font-family:var(--ui) !important;font-size:0
 }
 </style>""", unsafe_allow_html=True)
 
+st.markdown("""
+<style>
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  THREE.JS BACKGROUND — Document Verification Network
-#  Injected into parent document via components.html iframe trick
-# ─────────────────────────────────────────────────────────────────────────────
-components.html("""<script>
-(function() {
-  var pd = window.parent.document;
-  if (pd.getElementById('jv3d')) return;
-  var sl = pd.createElement('div');
-  sl.id = 'jv-sl';
-  sl.style.cssText = 'position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.012) 3px,rgba(0,0,0,0.012) 4px);';
-  pd.body.appendChild(sl);
-  var canvas = pd.createElement('canvas');
-  canvas.id = 'jv3d';
-  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;';
-  pd.body.insertBefore(canvas, pd.body.firstChild);
-  var scr = pd.createElement('script');
-  scr.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-  scr.onload = function() { initScene(canvas); };
-  pd.head.appendChild(scr);
+/* Aurora Background */
+.stApp {
+    background:
+        radial-gradient(circle at 15% 20%,
+            rgba(6,182,212,0.12),
+            transparent 35%),
 
-  function initScene(canvas) {
-    var W = window.parent.innerWidth;
-    var H = window.parent.innerHeight;
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 200);
-    camera.position.set(0, 0, 22);
-    camera.lookAt(0, 0, 0);
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.parent.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
-    window.parent.addEventListener('resize', function() {
-      W = window.parent.innerWidth; H = window.parent.innerHeight;
-      camera.aspect = W / H; camera.updateProjectionMatrix(); renderer.setSize(W, H);
-    });
+        radial-gradient(circle at 85% 15%,
+            rgba(139,92,246,0.12),
+            transparent 35%),
 
-    var docs = [];
-    var NUM_DOCS = 38;
-    for (var i = 0; i < NUM_DOCS; i++) {
-      var group = new THREE.Group();
-      var geo = new THREE.PlaneGeometry(0.80, 1.05);
-      var fillMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.025, side: THREE.DoubleSide });
-      group.add(new THREE.Mesh(geo, fillMat));
-      var edgeGeo = new THREE.EdgesGeometry(geo);
-      var edgeMat = new THREE.LineBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: 0.18 });
-      group.add(new THREE.LineSegments(edgeGeo, edgeMat));
-      var lineGeo2 = new THREE.PlaneGeometry(0.55, 0.06);
-      var lineMat2 = new THREE.MeshBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
-      for (var li = 0; li < 3; li++) {
-        var lm = new THREE.Mesh(lineGeo2, lineMat2.clone());
-        lm.position.set(0, 0.28 - li * 0.18, 0.001);
-        group.add(lm);
-      }
-      var x = (Math.random() - 0.5) * 34;
-      var y = (Math.random() - 0.5) * 18;
-      var z = -4 - Math.random() * 22;
-      group.position.set(x, y, z);
-      group.rotation.set((Math.random() - 0.5) * 0.5, Math.random() * Math.PI * 2, (Math.random() - 0.5) * 0.3);
-      scene.add(group);
-      docs.push({ group: group, fillMat: fillMat, edgeMat: edgeMat, phase: Math.random() * Math.PI * 2, state: 0, timer: 80 + Math.floor(Math.random() * 220), driftX: (Math.random() - 0.5) * 0.0015, driftY: (Math.random() - 0.5) * 0.0008 });
-    }
+        radial-gradient(circle at 50% 90%,
+            rgba(37,99,235,0.10),
+            transparent 40%),
 
-    var positions3d = docs.map(function(d) { return d.group.position.clone(); });
-    for (var i = 0; i < docs.length; i++) {
-      for (var j = i + 1; j < docs.length; j++) {
-        var dist = positions3d[i].distanceTo(positions3d[j]);
-        if (dist < 13) {
-          var pts = [positions3d[i].clone(), positions3d[j].clone()];
-          var lGeo = new THREE.BufferGeometry().setFromPoints(pts);
-          var alpha = (1 - dist / 13) * 0.09;
-          var lMat = new THREE.LineBasicMaterial({ color: 0x06B6D4, transparent: true, opacity: alpha });
-          scene.add(new THREE.Line(lGeo, lMat));
-        }
-      }
-    }
+        #080810 !important;
+}
 
-    var t = 0;
-    function animate() {
-      requestAnimationFrame(animate);
-      t += 0.008;
-      camera.position.x = Math.sin(t * 0.035) * 5;
-      camera.position.y = Math.sin(t * 0.022) * 2.5;
-      camera.lookAt(0, 0, 0);
-      docs.forEach(function(d) {
-        d.timer--;
-        if (d.timer <= 0) { d.state = (d.state + 1) % 3; d.timer = 80 + Math.floor(Math.random() * 220); }
-        d.group.position.x += d.driftX;
-        d.group.position.y += d.driftY;
-        d.group.rotation.y += 0.0015;
-        var pulse = Math.abs(Math.sin(t * 2.8 + d.phase));
-        var slow  = Math.sin(t * 0.7 + d.phase);
-        if (d.state === 0) {
-          d.fillMat.color.setHex(0xffffff); d.fillMat.opacity = 0.02 + slow * 0.007;
-          d.edgeMat.color.setHex(0x06B6D4); d.edgeMat.opacity = 0.12 + slow * 0.04;
-        } else if (d.state === 1) {
-          d.fillMat.color.setHex(0xef4444); d.fillMat.opacity = 0.04 + pulse * 0.07;
-          d.edgeMat.color.setHex(0xef4444); d.edgeMat.opacity = 0.18 + pulse * 0.22;
-        } else {
-          d.fillMat.color.setHex(0x10b981); d.fillMat.opacity = 0.04 + pulse * 0.03;
-          d.edgeMat.color.setHex(0x10b981); d.edgeMat.opacity = 0.18 + pulse * 0.10;
-        }
-      });
-      renderer.render(scene, camera);
-    }
-    animate();
-  }
-})();
-</script>""", height=0)
+/* Floating glow layer */
+.stApp::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+
+    background:
+        radial-gradient(circle at 30% 40%,
+            rgba(6,182,212,0.06),
+            transparent 20%),
+
+        radial-gradient(circle at 70% 60%,
+            rgba(139,92,246,0.06),
+            transparent 20%);
+
+    filter: blur(80px);
+    z-index: 0;
+}
+
+/* subtle grid */
+.stApp::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+
+    background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+
+    background-size: 50px 50px;
+
+    z-index: 0;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
